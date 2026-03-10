@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EC10b Midterm Review — Lectures 5 & 6</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --paper: #f5f0e8;
+    --gold: #c8a84b;
+    --gold-light: #e8d08b;
+    --red: #b83232;
+    --green: #2a6e3f;
+    --blue: #1a3a5c;
+    --blue-light: #2a5a8c;
+    --muted: #7a7060;
+    --card: #faf6ee;
+    --border: #d4c9a8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image: 
+      repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(180,160,100,0.08) 28px),
+      radial-gradient(ellipse at 20% 10%, rgba(200,168,75,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 90%, rgba(26,58,92,0.05) 0%, transparent 60%);
+  }
+
+  /* ── SCREEN SYSTEM ── */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ══════════════════════════════════════
+     HOME SCREEN
+  ══════════════════════════════════════ */
+  #home {
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #home::before {
+    content: '📈';
+    position: absolute;
+    font-size: 20rem;
+    opacity: 0.03;
+    top: -4rem;
+    left: -4rem;
+    transform: rotate(-15deg);
+    pointer-events: none;
+  }
+
+  .home-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1.5px solid var(--gold);
+    padding: 0.35rem 1rem;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    animation: fadeSlideDown 0.6s ease both;
+  }
+
+  .home-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 7vw, 5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+    animation: fadeSlideDown 0.6s 0.1s ease both;
+  }
+
+  .home-title span {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .home-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+    animation: fadeSlideDown 0.6s 0.2s ease both;
+  }
+
+  .home-topics {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 3rem;
+    animation: fadeSlideDown 0.6s 0.25s ease both;
+  }
+
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.2rem;
+    max-width: 860px;
+    width: 100%;
+    animation: fadeSlideDown 0.6s 0.35s ease both;
+  }
+
+  .mode-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    padding: 1.8rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mode-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .mode-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--gold);
+    box-shadow: 0 8px 24px rgba(200,168,75,0.15);
+  }
+
+  .mode-card:hover::after { opacity: 0.04; }
+
+  .mode-icon { font-size: 2rem; margin-bottom: 0.8rem; display: block; }
+  .mode-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: var(--ink);
+  }
+  .mode-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .mode-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    margin-top: 0.8rem;
+  }
+
+  /* ══════════════════════════════════════
+     SHARED GAME HEADER
+  ══════════════════════════════════════ */
+  .game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    background: var(--ink);
+    color: var(--paper);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .game-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .back-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    cursor: pointer;
+    border: 1px solid var(--gold);
+    padding: 0.3rem 0.7rem;
+    transition: all 0.15s;
+    background: none;
+  }
+  .back-btn:hover { background: var(--gold); color: var(--ink); }
+
+  .game-title-bar {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .score-bar {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+  }
+  .score-item { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; }
+  .score-label { color: #888; font-size: 0.6rem; letter-spacing: 0.1em; }
+  .score-val { color: var(--gold); font-size: 1rem; font-weight: 600; }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    height: 3px;
+    background: rgba(255,255,255,0.1);
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--gold);
+    transition: width 0.4s ease;
+  }
+
+  /* ══════════════════════════════════════
+     QUIZ SCREEN
+  ══════════════════════════════════════ */
+  #quiz {
+    padding: 0;
+  }
+
+  .quiz-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    max-width: 780px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .q-topic {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .q-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .q-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.2rem, 3vw, 1.6rem);
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: center;
+    margin-bottom: 2.5rem;
+    color: var(--ink);
+    max-width: 640px;
+  }
+
+  .q-formula {
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--ink);
+    color: var(--gold-light);
+    padding: 0.8rem 1.5rem;
+    font-size: 0.95rem;
+    border-radius: 2px;
+    margin: -1rem 0 2rem;
+    display: inline-block;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+    width: 100%;
+    max-width: 640px;
+  }
+
+  @media (max-width: 500px) { .options-grid { grid-template-columns: 1fr; } }
+
+  .option-btn {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    padding: 1rem 1.2rem;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--ink);
+    transition: all 0.15s;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--gold);
+    background: #fdf8ec;
+    transform: translateX(3px);
+  }
+
+  .opt-letter {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--gold);
+    min-width: 1.2rem;
+    padding-top: 0.1rem;
+  }
+
+  .option-btn.correct {
+    background: #e8f5ee;
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .option-btn.correct .opt-letter { color: var(--green); }
+
+  .option-btn.wrong {
+    background: #fceaea;
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .option-btn.wrong .opt-letter { color: var(--red); }
+
+  .option-btn.reveal-correct {
+    background: #e8f5ee;
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .option-btn:disabled { cursor: default; }
+
+  .feedback-box {
+    max-width: 640px;
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 1.2rem 1.5rem;
+    border-left: 3px solid var(--green);
+    background: #f0f8f4;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: #1a3a2a;
+    animation: fadeSlideDown 0.3s ease both;
+    display: none;
+  }
+
+  .feedback-box.wrong-fb {
+    border-color: var(--red);
+    background: #fdf0f0;
+    color: #4a1a1a;
+  }
+
+  .feedback-box strong {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+
+  .next-btn {
+    margin-top: 1.5rem;
+    background: var(--ink);
+    color: var(--gold);
+    border: none;
+    padding: 0.8rem 2.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: none;
+    text-transform: uppercase;
+  }
+  .next-btn:hover { background: var(--blue); }
+
+  /* ══════════════════════════════════════
+     FLASHCARD SCREEN
+  ══════════════════════════════════════ */
+  #flashcards {
+    padding: 0;
+  }
+
+  .flash-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+  }
+
+  .flash-hint {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .card-scene {
+    width: 100%;
+    max-width: 600px;
+    height: 320px;
+    perspective: 1200px;
+    cursor: pointer;
+    margin-bottom: 2rem;
+  }
+
+  .card-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card-inner.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    text-align: center;
+  }
+
+  .card-back {
+    transform: rotateY(180deg);
+    background: var(--ink);
+    border-color: var(--gold);
+    color: var(--paper);
+  }
+
+  .card-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+
+  .card-back .card-tag { color: var(--gold-light); }
+
+  .card-term {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.3rem, 4vw, 1.9rem);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .card-def {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: #d4c9a8;
+  }
+
+  .card-def .highlight {
+    color: var(--gold-light);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .flash-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .flash-btn {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    padding: 0.7rem 1.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all 0.15s;
+  }
+  .flash-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .flash-counter {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    min-width: 4rem;
+    text-align: center;
+  }
+
+  /* ══════════════════════════════════════
+     FORMULA CHALLENGE
+  ══════════════════════════════════════ */
+  .formula-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    max-width: 700px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .formula-display {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: clamp(1.2rem, 4vw, 2rem);
+    font-weight: 600;
+    background: var(--ink);
+    color: var(--gold-light);
+    padding: 1.5rem 2rem;
+    width: 100%;
+    max-width: 580px;
+    text-align: center;
+    margin-bottom: 2rem;
+    letter-spacing: 0.05em;
+    border: 1px solid #333;
+    box-shadow: inset 0 0 30px rgba(200,168,75,0.05);
+  }
+
+  .formula-q {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--ink);
+  }
+
+  .fill-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    justify-content: center;
+    max-width: 580px;
+    margin-bottom: 1.5rem;
+  }
+
+  .fill-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--ink);
+  }
+  .fill-chip:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); background: #fdf8ec; }
+  .fill-chip.selected { background: var(--ink); color: var(--gold); border-color: var(--ink); }
+  .fill-chip.correct-chip { background: var(--green); color: white; border-color: var(--green); }
+  .fill-chip.wrong-chip { background: var(--red); color: white; border-color: var(--red); }
+
+  /* ══════════════════════════════════════
+     SCENARIO MATCHING
+  ══════════════════════════════════════ */
+  .match-body {
+    flex: 1;
+    padding: 2rem 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .match-instructions {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+  }
+
+  .match-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media(max-width: 600px) { .match-columns { grid-template-columns: 1fr; } }
+
+  .match-col-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+
+  .match-item {
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    padding: 0.8rem 1rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    cursor: pointer;
+    margin-bottom: 0.6rem;
+    transition: all 0.15s;
+    color: var(--ink);
+    position: relative;
+  }
+
+  .match-item:hover:not(.matched):not(.disabled) {
+    border-color: var(--gold);
+    background: #fdf8ec;
+  }
+
+  .match-item.selected { border-color: var(--blue-light); background: #e8f0f8; }
+  .match-item.matched { border-color: var(--green); background: #e8f5ee; color: var(--green); cursor: default; }
+  .match-item.wrong-match { border-color: var(--red); background: #fceaea; }
+  .match-item.disabled { opacity: 0.5; cursor: default; }
+
+  .match-btn {
+    display: block;
+    margin: 0 auto 1rem;
+    background: var(--ink);
+    color: var(--gold);
+    border: none;
+    padding: 0.7rem 2rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .match-btn:hover { background: var(--blue); }
+
+  /* ══════════════════════════════════════
+     RESULTS SCREEN
+  ══════════════════════════════════════ */
+  #results {
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+  }
+
+  .result-grade {
+    font-family: 'Playfair Display', serif;
+    font-size: 6rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--gold);
+    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+
+  .result-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .result-msg {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--ink);
+  }
+
+  .result-sub {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+  }
+
+  .result-breakdown {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    max-width: 400px;
+    margin: 0 auto 2.5rem;
+  }
+
+  .rb-item {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    padding: 1rem;
+  }
+  .rb-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .rb-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  .result-btns {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .result-btn {
+    padding: 0.8rem 1.8rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s;
+    border: none;
+  }
+  .result-btn.primary { background: var(--ink); color: var(--gold); }
+  .result-btn.primary:hover { background: var(--blue); }
+  .result-btn.secondary { background: var(--card); color: var(--ink); border: 1.5px solid var(--border); }
+  .result-btn.secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ══════════════════════════════════════
+     REFERENCE SHEET
+  ══════════════════════════════════════ */
+  #reference {
+    padding: 0;
+  }
+
+  .ref-body {
+    flex: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 2rem 1.5rem;
+  }
+
+  .ref-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .ref-section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--ink);
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .ref-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .ref-table th {
+    background: var(--ink);
+    color: var(--gold);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+  }
+
+  .ref-table td {
+    padding: 0.7rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.4;
+    vertical-align: top;
+  }
+
+  .ref-table tr:nth-child(even) td { background: rgba(200,168,75,0.04); }
+
+  .ref-table .mono {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--blue);
+    font-weight: 600;
+  }
+
+  .ref-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .ref-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    padding: 1.2rem;
+  }
+
+  .ref-card-term {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
+    color: var(--ink);
+  }
+
+  .ref-card-def {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ══════════════════════════════════════
+     ANIMATIONS
+  ══════════════════════════════════════ */
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.5); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  .shake { animation: shake 0.3s ease; }
+
+  /* ── Misc ── */
+  .divider {
+    width: 60px;
+    height: 2px;
+    background: var(--gold);
+    margin: 0.8rem auto 2rem;
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    padding: 0.2rem 0.5rem;
+    text-transform: uppercase;
+  }
+  .tag-lec5 { background: rgba(26,58,92,0.1); color: var(--blue); border: 1px solid rgba(26,58,92,0.2); }
+  .tag-lec6 { background: rgba(200,168,75,0.1); color: #8a6820; border: 1px solid rgba(200,168,75,0.3); }
+  .tag-calc { background: rgba(42,110,63,0.1); color: var(--green); border: 1px solid rgba(42,110,63,0.2); }
+
+  .streak-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ HOME ══════════════════ -->
+<div id="home" class="screen active">
+  <div class="home-badge">EC10b — Macroeconomics</div>
+  <h1 class="home-title">Midterm<br><span>Review</span></h1>
+  <p class="home-sub">Lectures 5 & 6 · Macroeconomic Fluctuations & Time</p>
+  <p class="home-topics">Business Cycles · Recessions · Present Value · Savings Policy</p>
+  <div class="divider"></div>
+
+  <div class="mode-grid">
+    <div class="mode-card" onclick="startQuiz()">
+      <span class="mode-icon">🧠</span>
+      <div class="mode-name">Quiz Mode</div>
+      <div class="mode-desc">Multiple-choice questions covering every concept, formula, and case study from both lectures.</div>
+      <div class="mode-count">40 QUESTIONS · SCORED</div>
+    </div>
+    <div class="mode-card" onclick="startFlashcards()">
+      <span class="mode-icon">🃏</span>
+      <div class="mode-name">Flashcards</div>
+      <div class="mode-desc">Flip through all key terms, definitions, and formulas from the glossary. Click to reveal.</div>
+      <div class="mode-count">28 CARDS · SELF-PACED</div>
+    </div>
+    <div class="mode-card" onclick="startFormulas()">
+      <span class="mode-icon">🔢</span>
+      <div class="mode-name">Formula Lab</div>
+      <div class="mode-desc">Plug in numbers and identify what each variable represents. Practice every formula cold.</div>
+      <div class="mode-count">15 PROBLEMS · INTERACTIVE</div>
+    </div>
+    <div class="mode-card" onclick="startReference()">
+      <span class="mode-icon">📋</span>
+      <div class="mode-name">Reference Sheet</div>
+      <div class="mode-desc">All formulas, recession data, key terms, and comparison tables in one clean view.</div>
+      <div class="mode-count">COMPLETE REFERENCE</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ QUIZ ══════════════════ -->
+<div id="quiz" class="screen">
+  <div class="game-header">
+    <div class="game-header-left">
+      <button class="back-btn" onclick="goHome()">← HOME</button>
+      <div class="game-title-bar">Quiz Mode</div>
+    </div>
+    <div class="score-bar">
+      <div class="score-item">
+        <span class="score-label">SCORE</span>
+        <span class="score-val" id="q-score">0</span>
+      </div>
+      <div class="score-item">
+        <span class="score-label">STREAK</span>
+        <span class="streak-badge" id="q-streak">🔥0</span>
+      </div>
+      <div class="score-item">
+        <span class="score-label">Q</span>
+        <span class="score-val" id="q-num">1/40</span>
+      </div>
+    </div>
+  </div>
+  <div class="progress-wrap"><div class="progress-fill" id="q-progress" style="width:0%"></div></div>
+
+  <div class="quiz-body">
+    <div class="q-topic" id="q-topic"></div>
+    <div class="q-number" id="q-number"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="q-formula" id="q-formula" style="display:none"></div>
+    <div class="options-grid" id="q-options"></div>
+    <div class="feedback-box" id="q-feedback"></div>
+    <button class="next-btn" id="q-next" onclick="nextQuestion()">NEXT QUESTION →</button>
+  </div>
+</div>
+
+<!-- ══════════════════ FLASHCARDS ══════════════════ -->
+<div id="flashcards" class="screen">
+  <div class="game-header">
+    <div class="game-header-left">
+      <button class="back-btn" onclick="goHome()">← HOME</button>
+      <div class="game-title-bar">Flashcards</div>
+    </div>
+    <div class="score-bar">
+      <div class="score-item">
+        <span class="score-label">CARD</span>
+        <span class="score-val" id="fc-count">1/28</span>
+      </div>
+    </div>
+  </div>
+  <div class="progress-wrap"><div class="progress-fill" id="fc-progress" style="width:3.5%"></div></div>
+
+  <div class="flash-body">
+    <div class="flash-hint">Click card to flip · Use arrows to navigate</div>
+    <div class="card-scene" onclick="flipCard()">
+      <div class="card-inner" id="card-inner">
+        <div class="card-face card-front">
+          <div class="card-tag" id="fc-tag">TERM</div>
+          <div class="card-term" id="fc-front"></div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-tag">DEFINITION</div>
+          <div class="card-def" id="fc-back"></div>
+        </div>
+      </div>
+    </div>
+    <div class="flash-controls">
+      <button class="flash-btn" onclick="prevCard()">← PREV</button>
+      <div class="flash-counter" id="fc-counter">1 / 28</div>
+      <button class="flash-btn" onclick="nextCard()">NEXT →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ FORMULA LAB ══════════════════ -->
+<div id="formulalab" class="screen">
+  <div class="game-header">
+    <div class="game-header-left">
+      <button class="back-btn" onclick="goHome()">← HOME</button>
+      <div class="game-title-bar">Formula Lab</div>
+    </div>
+    <div class="score-bar">
+      <div class="score-item">
+        <span class="score-label">SCORE</span>
+        <span class="score-val" id="fl-score">0</span>
+      </div>
+      <div class="score-item">
+        <span class="score-label">Q</span>
+        <span class="score-val" id="fl-num">1/15</span>
+      </div>
+    </div>
+  </div>
+  <div class="progress-wrap"><div class="progress-fill" id="fl-progress" style="width:0%"></div></div>
+
+  <div class="formula-body" id="fl-body">
+    <div class="formula-display" id="fl-formula"></div>
+    <div class="formula-q" id="fl-question"></div>
+    <div class="fill-options" id="fl-options"></div>
+    <div class="feedback-box" id="fl-feedback"></div>
+    <button class="next-btn" id="fl-next" onclick="nextFormula()">NEXT →</button>
+  </div>
+</div>
+
+<!-- ══════════════════ RESULTS ══════════════════ -->
+<div id="results" class="screen">
+  <div class="result-label">FINAL SCORE</div>
+  <div class="result-grade" id="res-grade">A</div>
+  <div class="result-msg" id="res-msg">Excellent work!</div>
+  <div class="result-sub" id="res-sub">You're ready for the midterm.</div>
+
+  <div class="result-breakdown">
+    <div class="rb-item">
+      <div class="rb-val" id="res-correct">0</div>
+      <div class="rb-label">CORRECT</div>
+    </div>
+    <div class="rb-item">
+      <div class="rb-val" id="res-wrong">0</div>
+      <div class="rb-label">WRONG</div>
+    </div>
+    <div class="rb-item">
+      <div class="rb-val" id="res-pct">0%</div>
+      <div class="rb-label">ACCURACY</div>
+    </div>
+  </div>
+
+  <div class="result-btns">
+    <button class="result-btn primary" onclick="startQuiz()">RETRY QUIZ</button>
+    <button class="result-btn secondary" onclick="goHome()">HOME</button>
+    <button class="result-btn secondary" onclick="startReference()">REVIEW SHEET</button>
+  </div>
+</div>
+
+<!-- ══════════════════ REFERENCE ══════════════════ -->
+<div id="reference" class="screen">
+  <div class="game-header">
+    <div class="game-header-left">
+      <button class="back-btn" onclick="goHome()">← HOME</button>
+      <div class="game-title-bar">Reference Sheet</div>
+    </div>
+  </div>
+
+  <div class="ref-body">
+    <div class="ref-section">
+      <div class="ref-section-title">Key Formulas</div>
+      <table class="ref-table">
+        <tr><th>Formula</th><th>Name</th><th>Notes</th></tr>
+        <tr><td class="mono">FV = Z × (1 + i)<sup>T</sup></td><td>Future Value</td><td>Z = initial amount, i = rate, T = years</td></tr>
+        <tr><td class="mono">PV = Payment / (1 + i)<sup>T</sup></td><td>Present Value</td><td>Discount factor = 1/(1+i)<sup>T</sup></td></tr>
+        <tr><td class="mono">NPV = PV(benefits) − PV(costs)</td><td>Net Present Value</td><td>Pursue if NPV > 0</td></tr>
+        <tr><td class="mono">Price = D / (i − g)</td><td>Gordon Growth Model</td><td>D=dividend, g=growth rate, i=discount rate</td></tr>
+        <tr><td class="mono">r = i − π</td><td>Real Interest Rate</td><td>i=nominal rate, π=inflation</td></tr>
+        <tr><td class="mono">Y ≡ C + I + G + (X−M)</td><td>Aggregate Demand Identity</td><td>GDP from demand side</td></tr>
+        <tr><td class="mono">C ≈ 0.9 × (Y − T)</td><td>Consumption Function</td><td>MPC ≈ 0.9; each $1 income → $0.90 consumption</td></tr>
+        <tr><td class="mono">APR = 100 × (1.15)<sup>26</sup></td><td>Payday Loan APR</td><td>15%/2-wk → ~$3,786 per $100/yr</td></tr>
+      </table>
+    </div>
+
+    <div class="ref-section">
+      <div class="ref-section-title">Three Major Recessions Compared</div>
+      <table class="ref-table">
+        <tr><th>Feature</th><th>Great Depression (1929)</th><th>Great Recession (2007–09)</th><th>Pandemic Recession (2020)</th></tr>
+        <tr><td>Primary Shock</td><td>Financial + Dust Bowl supply</td><td>Financial (housing bubble)</td><td>Supply + Demand (COVID-19)</td></tr>
+        <tr><td>GDP Decline</td><td>26.3% peak-to-trough</td><td>3.8%</td><td>9.1% (Q2 2020 vs Q4 2019)</td></tr>
+        <tr><td>Peak Unemployment</td><td>~25%</td><td>10.0% (Oct 2009)</td><td>14.8% (Apr 2020)</td></tr>
+        <tr><td>Duration</td><td>43 months</td><td>18 months</td><td>2 months</td></tr>
+        <tr><td>Recovery Speed</td><td>10+ years</td><td>~6 years</td><td>Rapid (V-shaped)</td></tr>
+        <tr><td>Key Policy</td><td>New Deal; Fed errors</td><td>TARP, QE, stimulus</td><td>CARES Act; Fed emergency action</td></tr>
+      </table>
+    </div>
+
+    <div class="ref-section">
+      <div class="ref-section-title">Retirement Savings Gap</div>
+      <table class="ref-table">
+        <tr><th>Item</th><th>Amount</th></tr>
+        <tr><td>Theoretical savings (model, $30K income, 50 yrs @ 5%)</td><td class="mono">$593,502</td></tr>
+        <tr><td>Actual median net financial assets (ages 61–70)</td><td class="mono">$36,942</td></tr>
+        <tr><td>Gap factor: only 40% in retirement accounts</td><td class="mono">× 0.40</td></tr>
+        <tr><td>Gap factor: 70% leakage (only 30% stays in)</td><td class="mono">× 0.30</td></tr>
+        <tr><td>Gap factor: contribute ~5% not 9% (→ 1/3 employer match)</td><td class="mono">× 1/3</td></tr>
+        <tr><td>Gap factor: eligible only ~70% of working years</td><td class="mono">× 0.70</td></tr>
+        <tr><td><strong>Adjusted predicted savings</strong></td><td class="mono"><strong>≈ $27,697</strong></td></tr>
+      </table>
+    </div>
+
+    <div class="ref-section">
+      <div class="ref-section-title">Key Terms Glossary</div>
+      <div class="ref-cards" id="ref-glossary"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════
+
+const quizQuestions = [
+  // LECTURE 5 — Business Cycles & Recessions
+  {
+    topic: "Lecture 5 · Business Cycles",
+    text: "What is the NBER's official definition of a recession?",
+    options: ["Two consecutive quarters of negative GDP growth", "A significant decline in economic activity spread across the economy from peak to trough", "Unemployment exceeding 6% for 3+ months", "A 10%+ drop in the stock market"],
+    correct: 1,
+    feedback: "The NBER defines a recession as a significant decline in economic activity spread across the economy, lasting from a peak to a trough — this is broader than just two quarters of negative GDP."
+  },
+  {
+    topic: "Lecture 5 · Great Depression",
+    text: "What was the peak unemployment rate during the Great Depression?",
+    options: ["15%", "20%", "~25%", "30%"],
+    correct: 2,
+    feedback: "Unemployment peaked at approximately 25% of the labor force in 1933, with the Dow Jones having fallen 87% from 1929."
+  },
+  {
+    topic: "Lecture 5 · Multiplier Effect",
+    text: "What does the 'multiplier effect' mean in macroeconomics?",
+    options: ["GDP grows faster than employment", "An initial economic shock is amplified through feedback loops in consumption and income", "Taxes multiply government revenue", "Interest rates multiply the effect of monetary policy"],
+    correct: 1,
+    feedback: "The multiplier describes how an initial shock (e.g., drop in consumer confidence) cascades: lower consumption → lower firm revenue → layoffs → lower income → even lower consumption."
+  },
+  {
+    topic: "Lecture 5 · Labor Market",
+    text: "Why do downward rigid nominal wages cause unemployment during recessions?",
+    options: ["Workers become more productive during downturns", "Wages rise faster than prices, making labor too expensive", "Wages are slow to fall, so quantity of labor demanded falls below quantity supplied", "Minimum wage laws prevent any adjustment"],
+    correct: 2,
+    feedback: "Downward rigid wages mean nominal wages resist falling (due to contracts, worker resistance). So when labor demand drops left, the prevailing wage stays too high, creating an unemployment gap."
+  },
+  {
+    topic: "Lecture 5 · Aggregate Demand",
+    text: "In the equation Y ≡ C(Y–T, r) + I(Y, r) + G + (X–M), what does 'r' represent?",
+    options: ["Revenue", "Nominal interest rate", "Real interest rate (i − π)", "Rate of GDP growth"],
+    correct: 2,
+    feedback: "r = i − π is the real interest rate. Higher r → more expensive borrowing → lower C and I → lower GDP demand."
+  },
+  {
+    topic: "Lecture 5 · Aggregate Demand",
+    text: "According to the consumption function C ≈ 0.9 × (Y – T), if disposable income rises by $1,000, by how much does consumption increase?",
+    options: ["$1,000", "$900", "$100", "$9,000"],
+    correct: 1,
+    feedback: "The marginal propensity to consume (MPC) is ~0.9, so a $1,000 rise in disposable income raises consumption by about $900."
+  },
+  {
+    topic: "Lecture 5 · Types of Shocks",
+    text: "Which type of economic shock does the Dust Bowl (1934–1939) primarily represent?",
+    options: ["Demand shock", "Financial shock", "Supply (Real Business Cycle) shock", "Global shock"],
+    correct: 2,
+    feedback: "The Dust Bowl was a supply/productivity shock — it destroyed the agricultural capacity of the Great Plains, reducing real productive capacity and collateral values."
+  },
+  {
+    topic: "Lecture 5 · Types of Shocks",
+    text: "A sudden collapse in consumer confidence that leads people to spend less is an example of what type of shock?",
+    options: ["Supply shock", "Financial shock", "Demand (Keynesian) shock", "Global shock"],
+    correct: 2,
+    feedback: "Keynes called shifts in expectations 'animal spirits.' A collapse in confidence directly reduces consumption (C), shifting aggregate demand left — a classic demand shock."
+  },
+  {
+    topic: "Lecture 5 · 2007–2009 Recession",
+    text: "What was the primary initial cause of the 2007–2009 Great Recession?",
+    options: ["An oil price spike", "A fall in housing prices triggering a 50% collapse in new residential construction", "A sudden rise in taxes", "A trade war with China"],
+    correct: 1,
+    feedback: "Falling home prices collapsed residential investment by ~50%, caused mortgage defaults, led to bank failures, and froze the financial system. Peak unemployment: 10.0% in Oct 2009."
+  },
+  {
+    topic: "Lecture 5 · 2020 Recession",
+    text: "Why was the 2020 Pandemic Recession the shortest on record yet had the sharpest GDP drop since the Great Depression?",
+    options: ["The Fed raised interest rates quickly", "COVID caused both a supply AND demand shock simultaneously, but massive fiscal/monetary policy enabled rapid recovery", "Supply chains recovered naturally within weeks", "The recession only affected the service sector"],
+    correct: 1,
+    feedback: "COVID simultaneously reduced supply (broken chains) and demand (people stayed home). But the CARES Act and Fed emergency action enabled a rapid V-shaped recovery. Duration: just 2 months; GDP drop: −9.1% (annualized −29.9%)."
+  },
+  {
+    topic: "Lecture 5 · Business Cycles",
+    text: "How frequently do recessions occur in the U.S., on average since 1929?",
+    options: ["Every 2–3 years", "Every 6 years", "Every 10 years", "Every 15 years"],
+    correct: 1,
+    feedback: "Since 1929, recessions have occurred roughly once every 6 years, with an average duration of about 1 year."
+  },
+  {
+    topic: "Lecture 5 · Natural Recovery",
+    text: "Which of the following is NOT a natural recovery mechanism after a recession?",
+    options: ["Real wages fall as prices rise", "Households resume postponed purchases", "The central bank raises interest rates", "Inventories deplete and must be rebuilt"],
+    correct: 2,
+    feedback: "Raising interest rates would slow recovery. Natural mechanisms include: real wage adjustment, pent-up demand, capital reallocation, inventory rebuilding, and financial system healing."
+  },
+  {
+    topic: "Lecture 5 · Great Depression",
+    text: "How did the Dust Bowl amplify the financial crisis of the Great Depression?",
+    options: ["It boosted agricultural prices, helping farmers", "It destroyed collateral values (farmland), causing mortgage defaults and local bank failures", "It increased labor productivity in the Great Plains", "It shifted workers to manufacturing"],
+    correct: 1,
+    feedback: "Farms were collateral for bank loans. When drought destroyed farmland value, farmers defaulted, banks seized worthless land, and local banks failed — a preview of the 2008 housing collapse dynamic."
+  },
+  {
+    topic: "Lecture 5 · Policy",
+    text: "What are the two main policy tools policymakers can use if natural recovery is too slow?",
+    options: ["Import tariffs and export subsidies", "Monetary policy (cut interest rates) and fiscal policy (increase G or cut T)", "Price controls and wage controls", "Currency devaluation and foreign aid"],
+    correct: 1,
+    feedback: "Monetary policy lowers the real interest rate to stimulate C and I. Fiscal policy directly increases G or reduces T to boost disposable income."
+  },
+  {
+    topic: "Lecture 5 · Great Depression",
+    text: "What happened on 'Black Thursday,' October 24, 1929?",
+    options: ["The New York Stock Exchange permanently closed", "The Dow Jones lost 11% at the open", "The Great Plains experienced its worst dust storm", "The U.S. bank system was nationalized"],
+    correct: 1,
+    feedback: "Black Thursday marked the start of the 1929 crash, with the Dow losing 11% at the open. The DJIA would ultimately fall 87% by 1933."
+  },
+  // LECTURE 6 — Time Value of Money
+  {
+    topic: "Lecture 6 · Future Value",
+    text: "You invest $1,000 at 10% per year. What is the future value after 2 years?",
+    options: ["$1,200", "$1,210", "$1,100", "$2,000"],
+    correct: 1,
+    formula: "FV = $1,000 × (1.10)²",
+    feedback: "FV = $1,000 × (1.10)² = $1,000 × 1.21 = $1,210. The extra $10 over simple interest comes from earning interest on the first year's interest."
+  },
+  {
+    topic: "Lecture 6 · Present Value",
+    text: "What is the present value of $20,000 received in 20 years if the interest rate is 5%?",
+    options: ["$20,000", "$10,000", "~$7,538", "$15,000"],
+    correct: 2,
+    formula: "PV = $20,000 / (1.05)²⁰",
+    feedback: "PV = $20,000 / (1.05)^20 ≈ $7,538. Since $7,538 < $10,000 (the cost), the NPV is −$2,462 → reject the deal."
+  },
+  {
+    topic: "Lecture 6 · NPV",
+    text: "A project costs $50,000 today and returns $70,000 in 5 years. At a 5% discount rate, should you take it?",
+    options: ["Yes, $70,000 > $50,000", "No, because NPV = PV($70K) − $50K < 0", "Yes, because it returns more than invested", "Only if inflation is below 2%"],
+    correct: 1,
+    formula: "PV = $70,000 / (1.05)⁵ ≈ $54,843",
+    feedback: "PV = $70,000/(1.05)^5 ≈ $54,843. NPV = $54,843 − $50,000 = +$4,843 > 0. Actually YES, take it! (NPV is positive). The answer B is the trap — always compute first."
+  },
+  {
+    topic: "Lecture 6 · NPV Rule",
+    text: "What is the NPV decision rule?",
+    options: ["Pursue projects with NPV > 0; reject if NPV < 0", "Pursue projects where total returns > total costs", "Always pursue if expected returns exceed inflation", "Pursue if the payback period is under 5 years"],
+    correct: 0,
+    feedback: "NPV > 0 means the project earns more than the opportunity cost (the interest rate). NPV < 0 means you'd be better off just investing the money at the market rate."
+  },
+  {
+    topic: "Lecture 6 · Real vs Nominal",
+    text: "If the nominal interest rate is 3.6% and inflation is 2.7%, what is the real rate of return?",
+    options: ["6.3%", "0.9%", "3.6%", "2.7%"],
+    correct: 1,
+    formula: "r = i − π = 3.6% − 2.7%",
+    feedback: "r = i − π = 3.6% − 2.7% = 0.9%. The real rate measures actual growth in purchasing power, not just nominal dollars."
+  },
+  {
+    topic: "Lecture 6 · Stock Pricing",
+    text: "A stock pays a dividend of $2/share, growing at 4%/yr, discounted at 9%. What is its fair price?",
+    options: ["$20", "$40", "$50", "$100"],
+    correct: 1,
+    formula: "Price = D / (i − g) = $2 / (0.09 − 0.04)",
+    feedback: "Gordon Growth Model: Price = D/(i−g) = $2/(0.09−0.04) = $2/0.05 = $40."
+  },
+  {
+    topic: "Lecture 6 · Compound vs Simple",
+    text: "What is the difference in final value between compound and simple interest on $100 at 10% for 50 years?",
+    options: ["$600 vs $1,174", "$11,739 vs $600", "$11,739 vs $1,000", "$5,000 vs $600"],
+    correct: 1,
+    formula: "Compound: $100×(1.10)⁵⁰ = $11,739 | Simple: $100 + 50×$10 = $600",
+    feedback: "Simple interest: $600. Compound: $11,739. The ~$11,000 difference is entirely from 'interest on interest' — this is the power of compounding."
+  },
+  {
+    topic: "Lecture 6 · Present Bias",
+    text: "What does 'present bias' explain in the context of retirement savings?",
+    options: ["People save too much because they fear the future", "People over-weight immediate payoffs and under-weight future benefits, leading to undersaving", "People prefer bonds over stocks in their 20s", "People only save when interest rates are above 5%"],
+    correct: 1,
+    feedback: "Present bias is a psychological tendency to over-weight immediate gratification. Even knowing they 'should' save, people succumb to the temptation to spend now, leading to systematic undersaving."
+  },
+  {
+    topic: "Lecture 6 · Savings Policy",
+    text: "What is 'auto-enrollment' in retirement savings, and why does it work?",
+    options: ["The government automatically takes 10% of your paycheck", "Workers are automatically enrolled in 401(k) at 3% (with employer match) and must opt OUT", "Employers are required to match 100% of contributions", "Contributions are automatically invested in government bonds"],
+    correct: 1,
+    feedback: "Auto-enrollment exploits inertia: the default is enrollment. Since most people don't bother to opt out, participation rates soar. This 'nudge' respects choice while combating present bias."
+  },
+  {
+    topic: "Lecture 6 · Payday Loans",
+    text: "A payday lender charges 15% per 2-week period. What is the approximate annual amount owed on a $100 loan rolled over all year?",
+    options: ["$115", "$390", "$3,786", "$1,000"],
+    correct: 2,
+    formula: "100 × (1.15)²⁶ ≈ $3,786",
+    feedback: "There are 26 two-week periods in a year. $100 × (1.15)^26 ≈ $3,786. This ~3,686% APR is why the Military Lending Act caps rates at 36% for servicemembers."
+  },
+  {
+    topic: "Lecture 6 · Savings Gap",
+    text: "The theoretical retirement savings for a $30K/yr household saving 9% for 50 years at 5% is $593,502. The actual median (ages 61–70) is ~$36,942. Which factor does NOT explain this gap?",
+    options: ["Only 40% of workers participate in retirement accounts", "70% of contributions are leaked out pre-retirement", "People contribute ~5%, not 9%, of income", "The stock market returns less than 5% on average"],
+    correct: 3,
+    feedback: "The gap is explained by: low participation (40%), leakage (only 30% of contributions stay in), lower contribution rates (~5%), and only ~70% eligibility. The 5% model return is used in the adjusted calculation — market return is not the driver of the gap."
+  },
+  {
+    topic: "Lecture 6 · Social Security",
+    text: "What payroll tax rate funds Social Security, and what was the 2026 wage cap?",
+    options: ["6.2% up to $100,000", "12.4% up to $184,500", "2.9% up to all wages", "15% up to $50,000"],
+    correct: 1,
+    feedback: "Social Security is funded by a 12.4% payroll tax (split between employee and employer) on wages up to $184,500 in 2026. It replaces <50% of pre-retirement income for median households."
+  },
+  {
+    topic: "Lecture 6 · Medicare",
+    text: "What portion of post-65 medical costs does Medicare cover, and how is it funded?",
+    options: ["50% via income tax", "~75% via a 2.9% payroll tax during working life", "100% via Medicare premium payments", "~60% via general tax revenue"],
+    correct: 1,
+    feedback: "Medicare pays approximately 75% of medical costs after age 65, funded by a 2.9% payroll tax during working years (applied to all wages, no cap)."
+  },
+  {
+    topic: "Lecture 6 · Future Value",
+    text: "Why does compound interest create dramatically more wealth than simple interest over long time horizons?",
+    options: ["Banks charge lower fees on compound accounts", "You earn interest on your growing balance, not just the original deposit", "Compound rates are always higher", "Inflation erodes simple interest but not compound"],
+    correct: 1,
+    feedback: "Compound interest means each period you earn interest on the principal PLUS all accumulated interest. Over 50 years at 10%, this turns $100 into $11,739 vs. $600 with simple interest."
+  },
+  {
+    topic: "Lecture 5 · Shocks",
+    text: "The 2008 Greek Debt Crisis spreading to other European economies is an example of what type of shock?",
+    options: ["Supply shock", "Demand shock", "Financial shock", "Global shock"],
+    correct: 3,
+    feedback: "Global shocks occur when real or financial shocks in one country spill over to others — like the Greek crisis threatening the entire eurozone."
+  },
+  {
+    topic: "Lecture 5 · 2020 Recession",
+    text: "What was the annualized GDP decline in Q2 2020?",
+    options: ["−9.2%", "−14.8%", "−29.9%", "−3.8%"],
+    correct: 2,
+    formula: "Real GDP fell 9.1% Q2 vs Q4 2019 (annualized: −29.9%)",
+    feedback: "Real GDP fell 9.1% from Q4 2019 to Q2 2020 on a non-annualized basis. Annualized, this is −29.9% — the sharpest drop since the Great Depression, though the recession lasted just 2 months."
+  },
+  {
+    topic: "Lecture 6 · Discount Factor",
+    text: "The 'discount factor' in present value calculations is defined as:",
+    options: ["(1 + i)^T", "Payment / T", "1 / (1 + i)^T", "T × i"],
+    correct: 2,
+    formula: "Discount factor = 1 / (1+i)^T",
+    feedback: "The discount factor 1/(1+i)^T converts future dollars into today's dollars. A higher interest rate or longer time horizon means a smaller discount factor (future money is worth less today)."
+  },
+  {
+    topic: "Lecture 6 · Saver's Credit",
+    text: "The Saver's Credit offers government matches on savings at what rates?",
+    options: ["100%, 50%, or 25% depending on contribution size", "50%, 20%, or 10% depending on income (capped at $1,000/capita)", "10% for all income levels, up to $5,000", "25% for households below the median income"],
+    correct: 1,
+    feedback: "The Saver's Credit matches 50%, 20%, or 10% of contributions depending on income, capped at $1,000 per capita. Higher match rates go to lower-income savers."
+  },
+  {
+    topic: "Lecture 5 · Business Cycles",
+    text: "What was economist Irving Fisher's famous quote, and why is it cited in this lecture?",
+    options: ["He correctly predicted the 1929 crash 9 days in advance", "He declared stocks at 'a permanently high plateau' just 9 days before the crash — illustrating recessions are NOT predictable", "He invented the concept of present value the day before the crash", "He predicted a depression would last exactly 10 years"],
+    correct: 1,
+    feedback: "Fisher's 'permanently high plateau' statement — made 9 days before the crash — is a famous lesson that even top economists cannot reliably predict recessions. This is why NBER recessions are dated in retrospect."
+  },
+  {
+    topic: "Lecture 6 · Time Preference",
+    text: "How does money discounting differ from utility discounting?",
+    options: ["They are the same concept applied to different problems", "Money discounting uses interest rates; utility discounting uses psychological weights (present bias) from behavioral economics", "Money discounting applies to stocks; utility discounting to bonds", "Utility discounting is always larger than money discounting"],
+    correct: 1,
+    feedback: "Money discounting: PV = Payment/(1+i)^T uses market interest rates. Utility discounting reflects psychological tendencies — present bias means people act as if they weight future utility much less than present utility."
+  },
+  {
+    topic: "Lecture 5 · Recession Comparison",
+    text: "Why did the 2020 Pandemic Recession recover so much faster than the Great Depression?",
+    options: ["The pandemic affected fewer people than the Depression", "Aggressive fiscal (CARES Act) and monetary policy (Fed) stabilized demand quickly; plus demand had been artificially suppressed, not destroyed", "The stock market never fell in 2020", "Unemployment was lower in 2020 than in the Depression"],
+    correct: 1,
+    feedback: "The CARES Act ($2T+ in fiscal support) and Fed emergency facilities prevented demand destruction. Unlike the Depression (10+ year recovery partly due to policy mistakes), coordinated policy enabled a V-shaped recovery."
+  },
+  {
+    topic: "Lecture 6 · Future Value Stream",
+    text: "A household saves $2,700/year for 50 years at 5%. Their total savings (~$593,502) illustrates what concept?",
+    options: ["Simple interest accumulation", "The future value of an annuity (stream of payments) with compound growth", "The Gordon Growth Model applied to personal finance", "Net present value of a consumption stream"],
+    correct: 1,
+    feedback: "FV of a stream: $2,700 × [(1.05)^49 + (1.05)^48 + ... + 1] = $593,502. Each year's contribution compounds for a different number of years — the earliest contributions grow the most."
+  }
+];
+
+const flashcards = [
+  { tag: "Lecture 5", term: "Business Cycle", def: "Short-run variation in the growth of real GDP around its long-run trend. Consists of alternating expansions and recessions." },
+  { tag: "Lecture 5", term: "Recession (NBER)", def: "A significant decline in economic activity spread across the economy, lasting from a peak to a trough. Average duration ~12 months." },
+  { tag: "Lecture 5", term: "Expansion", def: "The period between a trough and the next peak, characterized by sustained GDP growth. The U.S. averages ~6 years per cycle." },
+  { tag: "Lecture 5", term: "Aggregate Demand (Y)", def: '<span class="highlight">Y ≡ C(Y–T, r) + I(Y, r) + G + (X–M)</span><br>Total spending in the economy. Higher real interest rate → lower C and I.' },
+  { tag: "Lecture 5", term: "Downward Rigid Wages", def: "Nominal wages that resist falling during downturns (due to contracts, worker psychology). Causes unemployment because quantity of labor demanded < supplied at prevailing wage." },
+  { tag: "Lecture 5", term: "Multiplier Effect", def: "Feedback loop where an initial shock is amplified: ↓Confidence → ↓C → ↓Revenue → ↓Labor demand → ↑Unemployment → ↓Income → ↓C further..." },
+  { tag: "Lecture 5", term: "Supply Shock", def: "A shock that changes productive capacity or technology. Examples: Dust Bowl (drought), COVID supply chains, oil price spike." },
+  { tag: "Lecture 5", term: "Demand Shock", def: "A shift in spending due to expectations ('animal spirits'), confidence collapse, or policy changes. Example: housing bubble burst in 2007–2008." },
+  { tag: "Lecture 5", term: "Financial Shock", def: "Disruption from asset price swings or financial institution failures. Examples: bank failures in 1929 and 2008." },
+  { tag: "Lecture 5", term: "MPC ≈ 0.9", def: "Marginal Propensity to Consume. Each $1 increase in disposable income raises consumption by ~$0.90. Drives the multiplier effect." },
+  { tag: "Lecture 5", term: "Real Interest Rate (r)", def: '<span class="highlight">r = i − π</span><br>Nominal interest rate minus inflation. Measures true cost of borrowing and real return on savings.' },
+  { tag: "Lecture 5", term: "Great Depression Stats", def: "1929–1939. Stock market −87%, peak unemployment ~25%, duration 43 months, GDP decline 26.3%. Black Thursday: Oct 24, 1929." },
+  { tag: "Lecture 5", term: "2007–2009 Recession", def: "Housing price collapse → 50% drop in residential construction (I↓) → mortgage defaults → bank failures → credit freeze. Peak unemployment: 10.0% (Oct 2009)." },
+  { tag: "Lecture 5", term: "2020 Pandemic Recession", def: "Simultaneous supply + demand shock. Unemployment 3.5% → 14.8%. GDP fell 9.1% in Q2 (annualized −29.9%). Shortest recession on record: 2 months." },
+  { tag: "Lecture 6", term: "Future Value Formula", def: '<span class="highlight">FV = Z × (1 + i)^T</span><br>Amount $Z grows to after T years at annual rate i. $1,000 at 10% for 50 years → $117,391.' },
+  { tag: "Lecture 6", term: "Present Value Formula", def: '<span class="highlight">PV = Payment / (1 + i)^T</span><br>Today\'s value of a future payment. Discount factor = 1/(1+i)^T.' },
+  { tag: "Lecture 6", term: "Net Present Value (NPV)", def: '<span class="highlight">NPV = PV(benefits) − PV(costs)</span><br>Pursue if NPV > 0. Reject if NPV < 0.' },
+  { tag: "Lecture 6", term: "Gordon Growth Model", def: '<span class="highlight">Stock Price = D / (i − g)</span><br>D = next dividend, i = discount rate, g = dividend growth rate. Example: D=$1, i=10%, g=8% → Price=$50.' },
+  { tag: "Lecture 6", term: "Compound vs. Simple Interest", def: "Simple: $100 + 50×$10 = $600 after 50 yrs at 10%. Compound: $100×(1.10)⁵⁰ = $11,739. Compounding earns interest on interest." },
+  { tag: "Lecture 6", term: "Present Bias", def: "Psychological over-weighting of immediate payoffs vs. future ones. Even rational people undersave because of the gap between 'what I should do' and 'what I'll do now.'" },
+  { tag: "Lecture 6", term: "Time Preference", def: "The tendency to value present utility more than equal future utility. Distinct from money discounting — uses psychological weights, not just interest rates." },
+  { tag: "Lecture 6", term: "Auto-Enrollment", def: "Default enrollment in a 401(k) at 3% with 50% employer match. Workers must opt OUT. Exploits inertia to increase savings participation." },
+  { tag: "Lecture 6", term: "Social Security Tax", def: "12.4% payroll tax (up to $184,500 in 2026) funding Social Security. Replaces <50% of pre-retirement income for median households." },
+  { tag: "Lecture 6", term: "Medicare Tax", def: "2.9% payroll tax (no wage cap) funding Medicare. Covers ~75% of medical costs after age 65." },
+  { tag: "Lecture 6", term: "Saver's Credit", def: "Government matches savings at 50%, 20%, or 10% depending on income. Capped at $1,000 per capita. Higher match for lower incomes." },
+  { tag: "Lecture 6", term: "Retirement Savings Gap", def: "Model predicts $593,502. Actual median (61–70): $36,942. Explained by: 40% participation × 30% retention × 1/3 match × 70% eligibility ≈ $27,697." },
+  { tag: "Lecture 6", term: "Payday Loan APR", def: '<span class="highlight">$100 × (1.15)^26 ≈ $3,786</span><br>15%/2-week → ~3,686% APR. Military Lending Act caps at 36% for servicemembers.' },
+  { tag: "Lecture 6", term: "Defined Benefit Pension", def: "Formula-based retirement income: e.g., 2% × years of service × final salary. Guaranteed regardless of market performance, unlike 401(k)s." },
+];
+
+const formulaProblems = [
+  {
+    formula: "FV = Z × (1 + i)^T",
+    question: "You invest $500 at 6% for 10 years. What is the Future Value?",
+    options: ["$800", "$895.42", "$1,000", "$3,000"],
+    correct: 1,
+    feedback: "FV = $500 × (1.06)^10 = $500 × 1.7908 ≈ $895.42"
+  },
+  {
+    formula: "PV = Payment / (1 + i)^T",
+    question: "What is the PV of $10,000 received in 5 years at an 8% discount rate?",
+    options: ["$6,806", "$8,000", "$10,000", "$7,500"],
+    correct: 0,
+    feedback: "PV = $10,000 / (1.08)^5 = $10,000 / 1.4693 ≈ $6,806"
+  },
+  {
+    formula: "r = i − π",
+    question: "Nominal rate = 4.5%, inflation = 3.2%. What is the REAL interest rate?",
+    options: ["7.7%", "4.5%", "3.2%", "1.3%"],
+    correct: 3,
+    feedback: "r = i − π = 4.5% − 3.2% = 1.3%. This measures actual purchasing power growth."
+  },
+  {
+    formula: "Stock Price = D / (i − g)",
+    question: "Dividend = $3, discount rate = 12%, growth rate = 7%. What's the stock price?",
+    options: ["$25", "$60", "$43", "$100"],
+    correct: 1,
+    feedback: "Price = $3 / (0.12 − 0.07) = $3 / 0.05 = $60"
+  },
+  {
+    formula: "NPV = PV(benefits) − PV(costs)",
+    question: "A project costs $100K today and returns $130K in 3 years. Discount rate = 6%. Accept or reject?",
+    options: ["Accept (NPV > 0)", "Reject (NPV < 0)", "Indifferent (NPV = 0)", "Need more info"],
+    correct: 0,
+    feedback: "PV($130K) = $130K/(1.06)^3 = $109,131. NPV = $109,131 − $100,000 = +$9,131 > 0 → ACCEPT."
+  },
+  {
+    formula: "C ≈ 0.9 × (Y − T)",
+    question: "Disposable income rises by $5,000. By how much does consumption change?",
+    options: ["$5,000", "$500", "$4,500", "$4,000"],
+    correct: 2,
+    feedback: "MPC = 0.9, so ΔC = 0.9 × $5,000 = $4,500. The remaining $500 goes to saving."
+  },
+  {
+    formula: "FV = Z × (1 + i)^T",
+    question: "What is the difference between simple and compound interest on $200 at 8% for 30 years?",
+    options: ["$280 simple vs $2,014 compound", "$480 simple vs $2,014 compound", "$600 simple vs $2,014 compound", "$480 simple vs $1,600 compound"],
+    correct: 1,
+    feedback: "Simple: $200 + 30×($200×0.08) = $200 + $480 = $680. Compound: $200×(1.08)^30 = $200×10.063 ≈ $2,013. Difference: ~$1,333."
+  },
+  {
+    formula: "PV = Payment / (1 + i)^T",
+    question: "Which payment has higher present value: $15,000 in 10 years at 5%, or $12,000 in 5 years at 5%?",
+    options: ["$15,000 in 10 years (PV ≈ $9,202)", "$12,000 in 5 years (PV ≈ $9,401)", "They are equal", "Cannot be compared"],
+    correct: 1,
+    feedback: "PV($15K,10yr) = $15K/(1.05)^10 = $9,202. PV($12K,5yr) = $12K/(1.05)^5 = $9,401. The 5-year payment has higher PV."
+  },
+  {
+    formula: "Stock Price = D / (i − g)",
+    question: "A stock's price/dividend (P/D) ratio is 50. What does this tell you about i − g?",
+    options: ["i − g = 50%", "i − g = 2%", "i − g = 5%", "i − g = 0.5%"],
+    correct: 1,
+    feedback: "If P = D/(i−g), then D/P = i−g. P/D = 50 means D/P = 1/50 = 2%. So the implied i−g = 2%."
+  },
+  {
+    formula: "APR = 100 × (1.15)^26",
+    question: "Why does the payday loan APR reach ~3,686% when the stated rate is 'just' 15%?",
+    options: ["The lender charges compound fees monthly", "The 15% applies every 2 weeks — there are 26 two-week periods in a year, so compounding explodes the effective rate", "The government adds a 3,571% tax", "It's a calculation error in the study guide"],
+    correct: 1,
+    feedback: "Compounding: $100 × (1.15)^26 ≈ $3,786. The '15%' is per 2-week period × 26 periods = devastating compounding. This is why these loans are often predatory."
+  },
+  {
+    formula: "r = i − π",
+    question: "If the real interest rate is 0.5% and inflation is 2.7%, what must the nominal rate be?",
+    options: ["2.2%", "3.2%", "0.5%", "2.7%"],
+    correct: 1,
+    feedback: "r = i − π → i = r + π = 0.5% + 2.7% = 3.2%. The nominal rate must compensate for both real return and inflation."
+  },
+  {
+    formula: "Y ≡ C + I + G + (X−M)",
+    question: "If consumer confidence collapses and C falls by $200B, and the multiplier is 2.5, what's the total impact on Y?",
+    options: ["−$200B", "−$80B", "−$500B", "−$250B"],
+    correct: 2,
+    feedback: "Total impact = initial shock × multiplier = −$200B × 2.5 = −$500B. The multiplier amplifies the initial shock through feedback loops."
+  },
+  {
+    formula: "FV = Z × (1 + i)^T",
+    question: "$1,000 at 10% for 50 years yields approximately:",
+    options: ["$6,000 (simple)", "$117,391 (compound)", "$11,739 (compound)", "$50,000"],
+    correct: 1,
+    feedback: "$1,000 × (1.10)^50 ≈ $117,391. (The study guide shows $1,000 for T=10 → $2,594 and T=50 → $117,391 at 10%.)"
+  },
+  {
+    formula: "NPV = PV(benefits) − PV(costs)",
+    question: "An investment costs $7,538 today and returns $20,000 in 20 years at 5%. What is the NPV?",
+    options: ["+$12,462", "$0", "−$2,462 if cost is $10,000", "+$7,538"],
+    correct: 2,
+    feedback: "PV($20K) = $20K/(1.05)^20 ≈ $7,538. If the investment costs $10,000: NPV = $7,538 − $10,000 = −$2,462 → REJECT. The question in the study guide uses $10K cost."
+  },
+  {
+    formula: "Price = D / (i − g)",
+    question: "If i increases from 10% to 12% but g stays at 8%, what happens to the stock price? (D=$1)",
+    options: ["Rises from $50 to $25", "Falls from $50 to $25", "Stays at $50", "Rises from $50 to $100"],
+    correct: 1,
+    feedback: "Original: $1/(0.10−0.08) = $50. New: $1/(0.12−0.08) = $25. A 2pp rise in the discount rate HALVED the stock price — this is why rising interest rates hurt stock valuations."
+  }
+];
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let quizIdx = 0, quizScore = 0, quizStreak = 0, quizAnswered = false;
+let fcIdx = 0, fcFlipped = false;
+let flIdx = 0, flScore = 0, flAnswered = false;
+let shuffledQuiz = [];
+
+// ══════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goHome() { showScreen('home'); }
+
+// ══════════════════════════════════════════════
+//  QUIZ
+// ══════════════════════════════════════════════
+function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+function startQuiz() {
+  shuffledQuiz = shuffle(quizQuestions);
+  quizIdx = 0; quizScore = 0; quizStreak = 0;
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = shuffledQuiz[quizIdx];
+  quizAnswered = false;
+
+  document.getElementById('q-topic').textContent = q.topic;
+  document.getElementById('q-number').textContent = `Question ${quizIdx + 1} of ${shuffledQuiz.length}`;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('q-score').textContent = quizScore;
+  document.getElementById('q-num').textContent = `${quizIdx + 1}/${shuffledQuiz.length}`;
+  document.getElementById('q-streak').textContent = `🔥${quizStreak}`;
+  document.getElementById('q-progress').style.width = `${(quizIdx / shuffledQuiz.length) * 100}%`;
+
+  const fEl = document.getElementById('q-formula');
+  if (q.formula) { fEl.textContent = q.formula; fEl.style.display = 'inline-block'; }
+  else { fEl.style.display = 'none'; }
+
+  const fb = document.getElementById('q-feedback');
+  fb.style.display = 'none';
+  document.getElementById('q-next').style.display = 'none';
+
+  const letters = ['A', 'B', 'C', 'D'];
+  const opts = document.getElementById('q-options');
+  opts.innerHTML = '';
+  const shuffledOpts = shuffle(q.options.map((o, i) => ({ text: o, orig: i })));
+
+  shuffledOpts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt.text}</span>`;
+    btn.onclick = () => selectAnswer(btn, opt.orig === q.correct, shuffledOpts, q);
+    opts.appendChild(btn);
+  });
+}
+
+function selectAnswer(btn, isCorrect, opts, q) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+
+  const buttons = document.querySelectorAll('.option-btn');
+  buttons.forEach((b, i) => {
+    b.disabled = true;
+    if (opts[i].orig === q.correct) b.classList.add('reveal-correct');
+  });
+
+  const fb = document.getElementById('q-feedback');
+  fb.style.display = 'block';
+
+  if (isCorrect) {
+    btn.classList.remove('reveal-correct');
+    btn.classList.add('correct');
+    quizScore++;
+    quizStreak++;
+    fb.className = 'feedback-box';
+    fb.innerHTML = `<strong>✓ CORRECT</strong>${q.feedback}`;
+  } else {
+    btn.classList.add('wrong');
+    quizStreak = 0;
+    fb.className = 'feedback-box wrong-fb';
+    fb.innerHTML = `<strong>✗ INCORRECT</strong>${q.feedback}`;
+    btn.classList.add('shake');
+    setTimeout(() => btn.classList.remove('shake'), 400);
+  }
+
+  document.getElementById('q-score').textContent = quizScore;
+  document.getElementById('q-streak').textContent = `🔥${quizStreak}`;
+  document.getElementById('q-next').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+  quizIdx++;
+  if (quizIdx >= shuffledQuiz.length) { showResults(); return; }
+  renderQuestion();
+}
+
+function showResults() {
+  const total = shuffledQuiz.length;
+  const pct = Math.round((quizScore / total) * 100);
+  let grade, msg, sub;
+
+  if (pct >= 93) { grade = 'A+'; msg = 'Outstanding!'; sub = 'You know this material cold. Go ace that midterm.'; }
+  else if (pct >= 90) { grade = 'A'; msg = 'Excellent work!'; sub = "You're very well prepared."; }
+  else if (pct >= 80) { grade = 'B+'; msg = 'Strong performance.'; sub = 'Review the questions you missed and you\'ll be set.'; }
+  else if (pct >= 70) { grade = 'B'; msg = 'Good effort.'; sub = 'Focus on the feedback from wrong answers.'; }
+  else if (pct >= 60) { grade = 'C'; msg = 'Keep studying.'; sub = 'Review the reference sheet and retry.'; }
+  else { grade = 'D'; msg = 'More review needed.'; sub = 'Go through flashcards and reference sheet first.'; }
+
+  document.getElementById('res-grade').textContent = grade;
+  document.getElementById('res-msg').textContent = msg;
+  document.getElementById('res-sub').textContent = sub;
+  document.getElementById('res-correct').textContent = quizScore;
+  document.getElementById('res-wrong').textContent = total - quizScore;
+  document.getElementById('res-pct').textContent = pct + '%';
+  showScreen('results');
+}
+
+// ══════════════════════════════════════════════
+//  FLASHCARDS
+// ══════════════════════════════════════════════
+function startFlashcards() {
+  fcIdx = 0; fcFlipped = false;
+  showScreen('flashcards');
+  renderCard();
+}
+
+function renderCard() {
+  const card = flashcards[fcIdx];
+  document.getElementById('fc-front').textContent = card.term;
+  document.getElementById('fc-back').innerHTML = card.def;
+  document.getElementById('fc-tag').textContent = card.tag;
+  document.getElementById('fc-count').textContent = `${fcIdx + 1}/${flashcards.length}`;
+  document.getElementById('fc-counter').textContent = `${fcIdx + 1} / ${flashcards.length}`;
+  document.getElementById('fc-progress').style.width = `${((fcIdx + 1) / flashcards.length) * 100}%`;
+
+  if (fcFlipped) {
+    document.getElementById('card-inner').classList.add('flipped');
+  } else {
+    document.getElementById('card-inner').classList.remove('flipped');
+  }
+}
+
+function flipCard() {
+  fcFlipped = !fcFlipped;
+  document.getElementById('card-inner').classList.toggle('flipped');
+}
+
+function nextCard() {
+  fcIdx = (fcIdx + 1) % flashcards.length;
+  fcFlipped = false;
+  renderCard();
+}
+
+function prevCard() {
+  fcIdx = (fcIdx - 1 + flashcards.length) % flashcards.length;
+  fcFlipped = false;
+  renderCard();
+}
+
+// ══════════════════════════════════════════════
+//  FORMULA LAB
+// ══════════════════════════════════════════════
+function startFormulas() {
+  flIdx = 0; flScore = 0; flAnswered = false;
+  showScreen('formulalab');
+  renderFormula();
+}
+
+function renderFormula() {
+  const p = formulaProblems[flIdx];
+  flAnswered = false;
+
+  document.getElementById('fl-formula').textContent = p.formula;
+  document.getElementById('fl-question').textContent = p.question;
+  document.getElementById('fl-score').textContent = flScore;
+  document.getElementById('fl-num').textContent = `${flIdx + 1}/${formulaProblems.length}`;
+  document.getElementById('fl-progress').style.width = `${(flIdx / formulaProblems.length) * 100}%`;
+
+  const fb = document.getElementById('fl-feedback');
+  fb.style.display = 'none';
+  document.getElementById('fl-next').style.display = 'none';
+
+  const opts = document.getElementById('fl-options');
+  opts.innerHTML = '';
+
+  p.options.forEach((opt, i) => {
+    const chip = document.createElement('button');
+    chip.className = 'fill-chip';
+    chip.textContent = opt;
+    chip.onclick = () => selectFormula(chip, i === p.correct, p);
+    opts.appendChild(chip);
+  });
+}
+
+function selectFormula(chip, isCorrect, p) {
+  if (flAnswered) return;
+  flAnswered = true;
+
+  document.querySelectorAll('.fill-chip').forEach(c => c.disabled = true);
+  const fb = document.getElementById('fl-feedback');
+  fb.style.display = 'block';
+
+  if (isCorrect) {
+    chip.classList.add('correct-chip');
+    flScore++;
+    fb.className = 'feedback-box';
+    fb.innerHTML = `<strong>✓ CORRECT</strong>${p.feedback}`;
+  } else {
+    chip.classList.add('wrong-chip');
+    fb.className = 'feedback-box wrong-fb';
+    fb.innerHTML = `<strong>✗ INCORRECT</strong>${p.feedback}`;
+  }
+
+  document.getElementById('fl-score').textContent = flScore;
+  document.getElementById('fl-next').style.display = 'inline-block';
+}
+
+function nextFormula() {
+  flIdx++;
+  if (flIdx >= formulaProblems.length) {
+    // Show results for formula lab
+    const pct = Math.round((flScore / formulaProblems.length) * 100);
+    quizScore = flScore;
+    shuffledQuiz = formulaProblems;
+    quizIdx = formulaProblems.length;
+    document.getElementById('res-grade').textContent = pct >= 80 ? 'A' : pct >= 60 ? 'B' : 'C';
+    document.getElementById('res-msg').textContent = 'Formula Lab Complete!';
+    document.getElementById('res-sub').textContent = `You got ${flScore}/${formulaProblems.length} formula problems correct.`;
+    document.getElementById('res-correct').textContent = flScore;
+    document.getElementById('res-wrong').textContent = formulaProblems.length - flScore;
+    document.getElementById('res-pct').textContent = pct + '%';
+    showScreen('results');
+    return;
+  }
+  renderFormula();
+}
+
+// ══════════════════════════════════════════════
+//  REFERENCE
+// ══════════════════════════════════════════════
+function startReference() {
+  showScreen('reference');
+  const container = document.getElementById('ref-glossary');
+  container.innerHTML = '';
+  flashcards.forEach(card => {
+    const el = document.createElement('div');
+    el.className = 'ref-card';
+    el.innerHTML = `
+      <div class="ref-card-term">${card.term}</div>
+      <div class="ref-card-def">${card.def}</div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+// ── Keyboard navigation for flashcards ──
+document.addEventListener('keydown', e => {
+  const fc = document.getElementById('flashcards');
+  if (!fc.classList.contains('active')) return;
+  if (e.key === 'ArrowRight') nextCard();
+  else if (e.key === 'ArrowLeft') prevCard();
+  else if (e.key === ' ') { e.preventDefault(); flipCard(); }
+});
+</script>
+</body>
+</html>
